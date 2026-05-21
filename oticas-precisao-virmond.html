@@ -141,7 +141,7 @@
     content:"";position:absolute;inset:0;border-radius:var(--radius);padding:1px;
     background:linear-gradient(135deg,transparent 40%,var(--gold) 50%,transparent 60%);
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:.4s;
+    -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:0;transition:.4s;
   }
   .action-card:hover{transform:translateY(-4px);background:linear-gradient(160deg,rgba(212,175,55,.08),rgba(255,255,255,.02))}
   .action-card:hover::before{opacity:1}
@@ -172,7 +172,7 @@
     transition:.3s;
   }
   .field input:focus,.field select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
-  .field select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23d4af37' d='M6 8L0 0h12z'/></svg>");background-repeat:no-repeat;background-position:right 16px center}
+  .field select{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMicgaGVpZ2h0PSc4JyB2aWV3Qm94PScwIDAgMTIgOCc+PHBhdGggZmlsbD0nI2Q0YWYzNycgZD0nTTYgOEwwIDBoMTJ6Jy8+PC9zdmc+");background-repeat:no-repeat;background-position:right 16px center}
   .form-card .btn{width:100%;justify-content:center;margin-top:6px}
 
   /* Promo cards */
