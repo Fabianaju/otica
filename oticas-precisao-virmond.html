@@ -470,34 +470,86 @@
 
   // QR Code
   const SITE_URL = 'https://fabianaju.github.io/otica/';
-  const qr = new QRCode(document.getElementById('qrcode'),{
-    text: SITE_URL, width:220, height:220,
-    colorDark:'#0a0a0a', colorLight:'#ffffff',
+  let qrReady = false;
+  const qrEl = document.getElementById('qrcode');
+
+  const qr = new QRCode(qrEl, {
+    text: SITE_URL, width: 220, height: 220,
+    colorDark: '#0a0a0a', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H
   });
 
-  function getQRImage(){
-    const c = document.querySelector('#qrcode canvas');
-    const i = document.querySelector('#qrcode img');
-    return c ? c.toDataURL('image/png') : (i ? i.src : null);
+  function waitQR(cb) {
+    const check = () => {
+      const c = qrEl.querySelector('canvas');
+      const i = qrEl.querySelector('img');
+      if (c || (i && i.complete && i.naturalWidth > 0)) { cb(); }
+      else { setTimeout(check, 100); }
+    };
+    check();
   }
-  function baixarQR(){
-    const url = getQRImage(); if(!url) return;
+  waitQR(() => { qrReady = true; });
+
+  function getQRDataURL() {
+    const c = qrEl.querySelector('canvas');
+    if (c) return c.toDataURL('image/png');
+    const i = qrEl.querySelector('img');
+    if (i && i.src) return i.src;
+    return null;
+  }
+
+  function dataURLtoBlob(dataURL) {
+    const [header, data] = dataURL.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(data);
+    const arr = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+
+  function baixarQR() {
+    if (!qrReady) { alert('Aguarde o QR Code carregar.'); return; }
+    const dataURL = getQRDataURL();
+    if (!dataURL) { alert('Nao foi possivel gerar o QR Code.'); return; }
     const a = document.createElement('a');
-    a.href = url; a.download = 'qrcode-oticas-precisao-virmond.png'; a.click();
+    a.href = dataURL;
+    a.download = 'qrcode-oticas-precisao-virmond.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
-  async function compartilharQR(){
-    const url = getQRImage(); if(!url) return;
-    try{
-      const blob = await (await fetch(url)).blob();
-      const file = new File([blob],'qrcode-precisao-virmond.png',{type:'image/png'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:'Óticas Precisão Virmond', text:'Acesse: '+SITE_URL});
-      } else {
-        await navigator.clipboard.writeText(SITE_URL);
-        alert('Link copiado: '+SITE_URL);
+
+  async function compartilharQR() {
+    if (!qrReady) { alert('Aguarde o QR Code carregar.'); return; }
+    const dataURL = getQRDataURL();
+    if (!dataURL) { alert('Nao foi possivel gerar o QR Code.'); return; }
+    const blob = dataURLtoBlob(dataURL);
+    const file = new File([blob], 'qrcode-precisao-virmond.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Oticas Precisao Virmond', text: 'Acesse: ' + SITE_URL });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
       }
-    }catch(err){ console.log(err); }
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Oticas Precisao Virmond', text: 'Acesse nossa pagina:', url: SITE_URL });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(SITE_URL);
+      alert('Link copiado para a area de transferencia!\n' + SITE_URL);
+    } catch {
+      prompt('Copie o link abaixo:', SITE_URL);
+    }
   }
 </script>
 </body>
